@@ -13,8 +13,9 @@ class TwigMinibaseExtension extends \Twig_Extension {
 	public function getFilters () {
 		$filters = array();
 		
-		$filters[] = new \Twig_SimpleFilter('route', function ($string) use ($plugin) {
-			return $this->plugin->currentView->call($string)->reverse();
+		$filters[] = new \Twig_SimpleFunction('route', function ($string) use ($plugin) {
+			$args = array_slice(func_get_args(), 1);
+			return $this->plugin->currentView->call($string)->reverse($args);
 		});
 		
 		return $filters;
