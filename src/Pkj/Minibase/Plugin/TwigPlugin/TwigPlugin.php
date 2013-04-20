@@ -55,6 +55,7 @@ class TwigPlugin extends Plugin {
 			return function ($vars, $view, $viewPath) use ($plugin) {
 				// Set current view instance.
 				$plugin->currentView = $this;
+				$vars['twigMBViewVar'] = $this;
 				// ignore $viewPath, we add this to Twig_Loader_Filesystem.
 				echo $plugin->twig->render($view, $vars);
 			};

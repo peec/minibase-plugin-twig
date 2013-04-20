@@ -2,23 +2,37 @@
 namespace Pkj\Minibase\Plugin\TwigPlugin;
 
 
-class TwigMinibaseExtension extends \Twig_Extension {
+use Pkj\Minibase\Plugin\TwigPlugin\Parser\CacheToken;
+
+class TwigMinibaseExtension extends \Twig_Extension {
 	
 	public $plugin;
+	
+	public function getName () {
+		return "Minibase Twig Base Functionality.";
+	}
 	
 	public function __construct(TwigPlugin $plugin) {
 		$this->plugin = $plugin;
 	}
-	
-	public function getFilters () {
-		$filters = array();
+	public function getTokenParsers() {
+		$parsers = array();
 		
-		$filters[] = new \Twig_SimpleFunction('route', function ($string) use ($plugin) {
+		$parsers[] = new CacheToken($this->plugin->currentView);
+		
+		return $parsers;
+	}
+	public function getFilters() {
+		$plugin = $this->plugin;
+		$funcs = array();
+		
+		$funcs[] = new \Twig_SimpleFilter('route', function ($string) use ($plugin) {
 			$args = array_slice(func_get_args(), 1);
-			return $this->plugin->currentView->call($string)->reverse($args);
+			
+			return $plugin->currentView->call($string)->reverse($args);
 		});
 		
-		return $filters;
+		return $funcs;
 	}
 	
 	
