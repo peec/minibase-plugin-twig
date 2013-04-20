@@ -32,6 +32,13 @@ class TwigMinibaseExtension extends \Twig_Extension {
 			return $plugin->currentView->call($string)->reverse($args);
 		});
 		
+		$funcs[] = new \Twig_SimpleFilter('asset', function ($string) use ($plugin) {
+			$args = array_slice(func_get_args(), 1);
+			
+			return $plugin->currentView->asset($string);
+		});
+		
+		
 		return $funcs;
 	}
 	

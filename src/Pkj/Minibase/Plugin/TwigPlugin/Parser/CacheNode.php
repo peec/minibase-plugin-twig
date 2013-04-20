@@ -14,7 +14,7 @@ class CacheNode extends \Twig_Node{
 
 		$compiler
 		->addDebugInfo($this)
-		->write("echo \$context['twigMBViewVar']->cache('".$this->getAttribute('cacheKey')."',function () { \n")
+		->write("echo \$context['twigMBViewVar']->cache(".$this->getAttribute('cacheKey').",function () { \n")
 		->subcompile($this->getNode('body'))
 		->write("}, ".$this->getAttribute('expire').", true);\n")
 		;

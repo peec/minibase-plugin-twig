@@ -14,7 +14,13 @@ class CacheToken extends MBTokenParser {
 	public function parse(\Twig_Token $token){
 		$lineno = $token->getLine();
 		
-		$cacheKey = $this->parser->getStream()->expect(\Twig_Token::STRING_TYPE)->getValue();
+		
+		// $cacheKey = $this->parser->getStream()->expect(\Twig_Token::STRING_TYPE)->getValue();
+		$stream = $this->parser->getStream();
+		
+		$expr = $this->parser->getExpressionParser()->parseExpression();
+		
+		$cacheKey = $this->parser->getEnvironment()->compile($expr);
 		
 		$value = 0;
 		if (!$this->parser->getStream()->test(\Twig_Token::BLOCK_END_TYPE)) {
