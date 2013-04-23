@@ -33,7 +33,13 @@ class TwigPlugin extends Plugin {
 			$callback = $this->config['loaderCallback']->bindTo($loader);
 			$callback();
 		}
+		
+		$this->mb->events->trigger("plugin:twig:loader", array($loader));
+		
 		$twig = new \Twig_Environment($loader, $this->config);
+		
+		$this->mb->events->trigger("plugin:twig:environment", array($twig));
+		
 		
 		$this->twig = $twig;
 		
