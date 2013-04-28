@@ -57,21 +57,25 @@ class TwigPlugin extends Plugin {
 		$plugin = $this;
 		
 		// Add event to onRender, override it.
-		$this->onRender = function () use ($plugin) {
-			return function ($vars, $view, $viewPath) use ($plugin) {
-				// Set current view instance.
-				$plugin->currentView = $this;
-				$vars['twigMBViewVar'] = $this;
-				// ignore $viewPath, we add this to Twig_Loader_Filesystem.
-				echo $plugin->twig->render($view, $vars);
-			};
+		$this->onRender = function (&$extHandlers) use ($plugin) {
+			if (!isset($extHandlers['twig'])) {
+				$callback = function ($vars, $view, $viewPath) use ($plugin) {
+					// Set current view instance.
+					$plugin->currentView = $this;
+					$vars['twigMBViewVar'] = $this;
+					// ignore $viewPath, we add this to Twig_Loader_Filesystem.
+					echo $plugin->twig->render($view, $vars);
+				};
+				$extHandlers['twig']  = $callback;
+				$extHandlers['html']  = $callback;
+			}
 		};
 		
 	}
 	
 	public function start () {
 		// Listen to render event.
-		$this->mb->events->on("mb:render", $this->onRender);
+		$this->mb->events->on("before:render:extension", $this->onRender);
 				
 	}
 	
