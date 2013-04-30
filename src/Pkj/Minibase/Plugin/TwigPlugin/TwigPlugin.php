@@ -76,11 +76,15 @@ class TwigPlugin extends Plugin {
 		};
 
 		
-		$this->twigPotHandler = function (&$typeMap) use ($plugin) {
+		$this->twigPotHandler = function (&$typeMap) use ($plugin, $twig) {
 			if (!isset($typeMap['twig'])) {
-				$typeMap['twig'] = function ($file) {
+				$poFactory  = new \Twig_Extensions_Extension_Gettext_POString_Kunststube_Adapter_Factory;
+				$extensions = $twig->getExtensions();
+				$extractor  = new \Twig_Extensions_Extension_Gettext_Extractor($poFactory, $extensions);
+				
+				$typeMap['twig'] = function ($file) use ($extractor) {
 					if (in_array(strtolower($file->getExtension()), array('twig', 'html'))) {
-						
+						return $extractor->extractFile($file);
 					}
 				};
 			}

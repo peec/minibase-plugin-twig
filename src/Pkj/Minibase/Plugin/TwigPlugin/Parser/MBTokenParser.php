@@ -11,7 +11,7 @@ abstract class MBTokenParser extends \Twig_TokenParser{
 	 */
 	protected $view;
 	
-	public function __construct (View $view) {
+	public function __construct (View $view = null) {
 		$this->view = $view;
 	}
 	
