@@ -4,6 +4,9 @@ Enables Twig based templates. Uses the same interface as Minibase offers for
 rendering normal PHP views. Also includes custom blocks, filters and functions to take the full out of Minibase. Easily do `Fragment caching`. 
 
 
+This plugin makes it possible to render `.twig` and `.html` files with the Twig templating engine. `.php` files will still get rendered by the default Minibase view rendering engine.
+
+
 ## Install
 
 ```json
