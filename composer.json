@@ -13,7 +13,10 @@
         }
     ],
     "autoload": {
-        "psr-0": {"Pkj\\Minibase\\Plugin\\TwigPlugin": "src/"}
+        "psr-0": {
+        	"Pkj\\Minibase\\Plugin\\TwigPlugin": "src/",
+        	"Twig_Extensions_": "src/"
+        }
     },
     "require": {
         "php": ">=5.4.0",

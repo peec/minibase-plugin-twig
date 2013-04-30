@@ -21,6 +21,8 @@ class TwigPlugin extends Plugin {
 	
 	// Events
 	private $onRender;
+	private $twigPotHandler;
+	
 	
 	public function setup() {
 		if (!isset($this->mb->cfg[MB::CFG_VIEWPATH])) {
@@ -46,12 +48,14 @@ class TwigPlugin extends Plugin {
 		$this->ext = new TwigMinibaseExtension($this);
 		// Add the extension for custom behavior based on minibase functions.
 		$twig->addExtension($this->ext);
+		//$twig->addExtension(new Twig_Extensions_Extension_Gettext);
 		
 		// Custom twigCallback bound to $this->twig.
 		if (isset($this->config['twigCallback'])) {
 			$callback = $this->config['twigCallback']->bindTo($this->twig);
 			$callback();
 		}
+		
 		
 		
 		$plugin = $this;
@@ -70,16 +74,27 @@ class TwigPlugin extends Plugin {
 				$extHandlers['html']  = $callback;
 			}
 		};
+
 		
+		$this->twigPotHandler = function (&$typeMap) use ($plugin) {
+			if (!isset($typeMap['twig'])) {
+				$typeMap['twig'] = function ($file) {
+					if (in_array(strtolower($file->getExtension()), array('twig', 'html'))) {
+						
+					}
+				};
+			}
+		};
 	}
 	
 	public function start () {
 		// Listen to render event.
 		$this->mb->events->on("before:render:extension", $this->onRender);
-				
+		$this->mb->events->on("mb:generate-po", $this->twigPotHandler);
 	}
 	
 	public function stop () {
-		$this->mb->events->off("mb:render", $this->onRender);		
+		$this->mb->events->off("mb:render", $this->onRender);
+		$this->mb->events->off("mb:generate-po", $this->twigPotHandler);
 	}
 }
