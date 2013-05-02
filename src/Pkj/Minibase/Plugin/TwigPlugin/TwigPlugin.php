@@ -1,6 +1,8 @@
 <?php
 namespace Pkj\Minibase\Plugin\TwigPlugin;
 
+use Pkj\Minibase\Plugin\TwigPlugin\GetText\TwigGetTextPlugin;
+
 use Minibase\Plugin\Plugin;
 use Minibase\MB;
 
@@ -48,7 +50,7 @@ class TwigPlugin extends Plugin {
 		$this->ext = new TwigMinibaseExtension($this);
 		// Add the extension for custom behavior based on minibase functions.
 		$twig->addExtension($this->ext);
-		$twig->addExtension(new \Twig_Extensions_Extension_Gettext);
+		$twig->addExtension(new TwigGetTextPlugin());
 		
 		// Custom twigCallback bound to $this->twig.
 		if (isset($this->config['twigCallback'])) {
@@ -78,14 +80,11 @@ class TwigPlugin extends Plugin {
 		
 		$this->twigPotHandler = function (&$typeMap) use ($plugin, $twig) {
 			if (!isset($typeMap['twig'])) {
-				$poFactory  = new \Twig_Extensions_Extension_Gettext_POString_Kunststube_Adapter_Factory;
-				$extensions = $twig->getExtensions();
-				$extractor  = new \Twig_Extensions_Extension_Gettext_Extractor($poFactory, $extensions);
 				
-				$typeMap['twig'] = function ($file) use ($extractor) {
-					if (in_array(strtolower($file->getExtension()), array('twig', 'html'))) {
-						return $extractor->extractFile($file);
-					}
+				$typeMap['twig'] = function () use ($twig) {
+					$ex = new TwigPotFileExtractor();
+					$ex->setTwig($twig);
+					return $ex;
 				};
 			}
 		};
