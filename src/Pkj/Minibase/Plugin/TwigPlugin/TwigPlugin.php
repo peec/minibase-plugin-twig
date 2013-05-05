@@ -6,6 +6,12 @@ use Pkj\Minibase\Plugin\TwigPlugin\GetText\TwigGetTextPlugin;
 use Minibase\Plugin\Plugin;
 use Minibase\MB;
 
+use Assetic\Extension\Twig\AsseticExtension;
+use Assetic\Extension\Twig\TwigFormulaLoader;
+use Assetic\Extension\Twig\TwigResource;
+
+
+
 class TwigPlugin extends Plugin {
 	public $twig;
 	
@@ -24,6 +30,7 @@ class TwigPlugin extends Plugin {
 	// Events
 	private $onRender;
 	private $twigPotHandler;
+	private $mbAsseticAmHandler;
 	
 	
 	public function setup() {
@@ -51,6 +58,11 @@ class TwigPlugin extends Plugin {
 		// Add the extension for custom behavior based on minibase functions.
 		$twig->addExtension($this->ext);
 		$twig->addExtension(new TwigGetTextPlugin());
+		
+		
+		if ($asseticPlugin = $this->mb->get('Minibase\Assetic\AsseticPlugin')) {
+			$twig->addExtension(new AsseticExtension($asseticPlugin->assetFactory));
+		}
 		
 		// Custom twigCallback bound to $this->twig.
 		if (isset($this->config['twigCallback'])) {
@@ -88,16 +100,59 @@ class TwigPlugin extends Plugin {
 				};
 			}
 		};
+		
+		
+		$this->mbAsseticAmHandler = function ($am) use ($twig, $plugin, $loader) {
+			
+			
+			// enable loading assets from twig templates
+			$am->setLoader('twig', new TwigFormulaLoader($twig));
+			
+			
+			$templates = array();
+			
+			
+			$twigNamespaces = $loader->getNamespaces();
+			foreach ($twigNamespaces as $ns) {	
+				$paths = $loader->getPaths($ns);
+				foreach ($paths as $path) {
+					$path = realpath($path);					
+					$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::LEAVES_ONLY);
+					foreach ($iterator as $file) {
+						if ($file->isFile() && in_array($file->getExtension(), array('twig','html'))) {
+							
+							$f = substr($file, strlen($path)+1);
+							
+							$templates[] = $f;
+						}
+					}
+				}
+				
+			}
+			
+			
+			// loop through all your templates
+			foreach ($templates as $template) {
+				
+				$resource = new TwigResource($loader, $template);
+				$am->addResource($resource, 'twig');
+			}
+			
+		};
+		
+		
 	}
 	
 	public function start () {
 		// Listen to render event.
 		$this->mb->events->on("before:render:extension", $this->onRender);
 		$this->mb->events->on("mb:generate-po", $this->twigPotHandler);
+		$this->mb->events->on("mb:assetic:am", $this->mbAsseticAmHandler);
 	}
 	
 	public function stop () {
 		$this->mb->events->off("mb:render", $this->onRender);
 		$this->mb->events->off("mb:generate-po", $this->twigPotHandler);
+		$this->mb->events->off("mb:assetic:am", $this->mbAsseticAmHandler);
 	}
 }
